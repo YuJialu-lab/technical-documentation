@@ -1,87 +1,177 @@
-# technical-documentation
-Technical Documentation
+# UTM Attribution Script
 
+## Overview
 
+This script handles automatic client-side UTM tracking and attribution.
 
-UTM Builder Documentation
-Overview
+It:
+- Reads UTM parameters from the URL
+- Detects traffic source from `document.referrer`
+- Classifies traffic into search, AI, social, or referral sources
+- Stores attribution data in `sessionStorage`
+- Syncs UTM parameters back into the URL
 
-This module generates UTM-tagged URLs for marketing campaigns.
+Designed for first-touch attribution per session.
 
-It appends standardized tracking parameters to a base URL so that analytics tools (e.g. Google Analytics 4) can attribute traffic to specific marketing sources, campaigns, and ads.
+---
 
-This system does not affect page behavior. It only modifies URLs for tracking purposes.
+## How it works
 
-What this module does
+The script runs on page load and follows three phases:
 
-Given a base URL and campaign metadata, it returns a fully constructed tracking URL with UTM parameters.
+---
 
-Input
-Base URL (required)
-Campaign metadata (required + optional fields)
-Output
-URL with appended UTM query parameters
-UTM Parameters
+## 1. UTM Detection (URL-based attribution)
 
-UTM parameters follow the standard marketing tracking structure:
+If the URL contains:
+- utm_source
+- utm_medium
+- utm_campaign
 
-Required fields
-Parameter	Description
-utm_source	Traffic source (e.g. google, newsletter, facebook)
-utm_medium	Marketing channel type (e.g. cpc, email, social)
-utm_campaign	Campaign identifier (e.g. launch_2026, spring_sale)
-Optional fields
-Parameter	Description
-utm_content	Differentiates ads or links (e.g. banner_1, button_a)
-utm_term	Paid search keyword or targeting term
-Example Output
-Input
-baseUrl: "https://example.com"
-utm_source: "google"
-utm_medium: "cpc"
-utm_campaign: "launch_2026"
-utm_content: "ad_variant_1"
-utm_term: "layout_tool"
-Output
-https://example.com/?utm_source=google&utm_medium=cpc&utm_campaign=launch_2026&utm_content=ad_variant_1&utm_term=layout_tool
-Usage
-JavaScript Example
-function buildUtmUrl(baseUrl, params) {
-  const url = new URL(baseUrl);
+Then:
+- Values are stored in sessionStorage
+- They override referrer detection
+- Attribution is locked for the session
 
-  Object.entries(params).forEach(([key, value]) => {
-    if (value) url.searchParams.append(key, value);
-  });
+Example:
+https://site.com/?utm_source=google&utm_medium=cpc&utm_campaign=launch
 
-  return url.toString();
+---
+
+## 2. Referrer-based attribution (first visit only)
+
+If no UTM exists and session is not initialized, the script checks document.referrer.
+
+### Search engines → organic
+google, bing, yahoo, duckduckgo, brave, ecosia, baidu, yandex
+
+Result:
+utm_source = engine  
+utm_medium = organic  
+
+---
+
+### AI tools → ai_referral
+chat.openai.com → chatgpt  
+chatgpt.com → chatgpt  
+perplexity.ai → perplexity  
+claude.ai → claude  
+copilot.microsoft.com → copilot  
+
+Result:
+utm_source = platform  
+utm_medium = ai_referral  
+
+---
+
+### Social networks → social
+facebook.com → facebook  
+instagram.com → instagram  
+x.com / t.co → twitter  
+linkedin.com → linkedin  
+tiktok.com → tiktok  
+youtube.com → youtube  
+
+Result:
+utm_source = platform  
+utm_medium = social  
+
+---
+
+### Unknown referrers → referral
+
+utm_source = referrer hostname  
+utm_medium = referral  
+
+---
+
+### No referrer → direct
+
+utm_source = direct  
+utm_medium = ""  
+
+---
+
+## 3. Session Storage Logic
+
+Stored in sessionStorage:
+
+| Key | Meaning |
+|-----|--------|
+| utm_source | Traffic source |
+| utm_medium | Channel type |
+| utm_campaign | Campaign name |
+| utm_initialized | Prevents re-evaluation |
+
+Behavior:
+- Runs once per session
+- Values persist across navigation
+- Original source is preserved
+
+---
+
+## 4. URL Synchronization
+
+If UTM parameters are missing:
+
+Stored values are added to URL using replaceState.
+
+Before:
+https://site.com/page
+
+After:
+https://site.com/page?utm_source=google&utm_medium=organic&utm_campaign=
+
+---
+
+## 5. Core Function: match(ref, map)
+
+function match(ref, map) {
+  for (const domain in map) {
+    if (ref.includes(domain)) return map[domain];
+  }
+  return null;
 }
 
-const url = buildUtmUrl("https://example.com", {
-  utm_source: "google",
-  utm_medium: "cpc",
-  utm_campaign: "launch_2026",
-  utm_content: "ad_variant_1",
-  utm_term: "layout_tool"
-});
+Purpose:
+- Matches referrer domain
+- Returns standardized source label
 
-console.log(url);
-Rules & Constraints
-Base URL must be valid and include protocol (http/https)
-UTM keys must follow lowercase naming convention
-Empty values are ignored and not appended
-Parameters are appended using query string format (?key=value)
-Existing query parameters in base URL are preserved
-Behavior Notes
-This module does not validate marketing strategy
-It does not interpret campaign meaning
-It only constructs URLs based on provided input
-It is deterministic (same input always produces same output)
-Example Use Cases
-Google Ads tracking links
-Email marketing campaigns
-Social media campaign attribution
-A/B testing landing pages
-Affiliate link tracking
-Summary
+---
 
-This UTM builder standardizes marketing URLs by appending structured tracking parameters to a base URL, enabling consistent attribution across campaigns and platforms.
+## 6. Attribution Priority
+
+1. UTM in URL (highest priority)
+2. sessionStorage (if initialized)
+3. Referrer detection
+4. Direct traffic
+
+---
+
+## 7. Data Model
+
+{
+  "utm_source": "google",
+  "utm_medium": "organic",
+  "utm_campaign": "",
+  "utm_initialized": "true"
+}
+
+---
+
+## 8. Summary
+
+- First-touch attribution per session
+- UTM overrides referrer logic
+- Traffic categorized into search, AI, social, referral
+- Direct traffic supported
+- URL normalization included
+
+---
+
+## 9. Limitations
+
+- sessionStorage only (not persistent across sessions)
+- Referrer depends on browser privacy settings
+- AI detection depends on known domains list
+- No server-side validation
