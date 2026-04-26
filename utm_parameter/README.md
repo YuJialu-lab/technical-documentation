@@ -1,5 +1,38 @@
 # UTM Attribution Script
 
+## What is this?
+
+This is a client-side script that tracks where your website visitors come from.
+
+It captures traffic sources (like search engines, social platforms, or AI tools) and keeps that information consistent during a user session.
+
+---
+
+## Why is this needed?
+
+In many setups, attribution breaks easily:
+
+- UTM parameters disappear after the first page
+- Referrer data can be unreliable or missing
+- Analytics tools may not preserve the original source
+
+This script ensures:
+
+- The **first traffic source is captured once**
+- Attribution stays consistent across pages
+- Marketing data remains reliable within a session
+
+---
+
+## How does it work (simple view)?
+
+1. Check if UTM parameters exist in the URL  
+2. If not, detect the source using `document.referrer`  
+3. Store the result in `sessionStorage`  
+4. Reuse and sync the values across pages  
+
+---
+
 ## Overview
 
 This script handles automatic UTM tracking and attribution on the client side.
