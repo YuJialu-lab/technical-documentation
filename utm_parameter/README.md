@@ -41,7 +41,74 @@ Example:
 ```
 https://site.com/?utm_source=google&utm_medium=cpc&utm_campaign=launch
 ```
+## 1.1 utm_source
 
+### Definition
+Represents the origin system or platform that generated the traffic.
+
+### Resolution logic
+
+- If `utm_source` exists in URL → use directly  
+- Else derive from referrer classification:  
+  - search engine → mapped engine name  
+  - AI tool → mapped AI platform name  
+  - social platform → mapped social network name  
+  - unknown referrer → hostname extraction  
+  - no referrer → direct  
+
+### Output examples
+
+google  
+bing  
+chatgpt  
+linkedin  
+medium.com  
+direct  
+
+### Stored as
+
+sessionStorage.utm_source  
+
+---
+
+## 1.2 utm_medium
+
+### Definition
+Represents the traffic acquisition channel type.
+
+### Resolution logic
+
+From URL (if present) OR inferred from referrer:
+
+| Condition | Value |
+|----------|------|
+| search engine referrer | organic |
+| AI platform referrer | ai_referral |
+| social platform referrer | social |
+| unknown external referrer | referral |
+| no referrer | "" (empty string) |
+| UTM URL provided | preserved value |
+
+### Stored as
+
+sessionStorage.utm_medium  
+
+---
+
+## 1.3 utm_campaign
+
+### Definition
+Represents the marketing campaign identifier.
+
+### Resolution logic
+
+- Only populated if present in URL  
+- Never inferred from referrer  
+- Default: empty string  
+
+### Stored as
+
+sessionStorage.utm_campaign
 ---
 
 ## 2. Referrer-based attribution (first visit only)
