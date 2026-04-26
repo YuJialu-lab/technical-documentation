@@ -59,7 +59,7 @@ Represents the origin system or platform that generated the traffic.
   - unknown referrer → hostname extraction  
   - no referrer → direct  
 
-**Output examples**
+**Output (current implementation)**
 
 google  
 bing  
@@ -135,7 +135,6 @@ Mapped domains:
 - ecosia → ecosia  
 - baidu → baidu  
 - yandex → yandex  
-- etc.
 
 Result:
 
