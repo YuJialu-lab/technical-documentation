@@ -41,12 +41,15 @@ Example:
 ```
 https://site.com/?utm_source=google&utm_medium=cpc&utm_campaign=launch
 ```
-## 1.1 utm_source
 
-### Definition
+---
+
+### utm_source
+
+**Definition**  
 Represents the origin system or platform that generated the traffic.
 
-### Resolution logic
+**Resolution logic**
 
 - If `utm_source` exists in URL → use directly  
 - Else derive from referrer classification:  
@@ -56,7 +59,7 @@ Represents the origin system or platform that generated the traffic.
   - unknown referrer → hostname extraction  
   - no referrer → direct  
 
-### Output examples
+**Output examples**
 
 google  
 bing  
@@ -65,18 +68,18 @@ linkedin
 medium.com  
 direct  
 
-### Stored as
+**Stored as**
 
 sessionStorage.utm_source  
 
 ---
 
-## 1.2 utm_medium
+### utm_medium
 
-### Definition
+**Definition**  
 Represents the traffic acquisition channel type.
 
-### Resolution logic
+**Resolution logic**
 
 From URL (if present) OR inferred from referrer:
 
@@ -89,26 +92,27 @@ From URL (if present) OR inferred from referrer:
 | no referrer | "" (empty string) |
 | UTM URL provided | preserved value |
 
-### Stored as
+**Stored as**
 
 sessionStorage.utm_medium  
 
 ---
 
-## 1.3 utm_campaign
+### utm_campaign
 
-### Definition
+**Definition**  
 Represents the marketing campaign identifier.
 
-### Resolution logic
+**Resolution logic**
 
 - Only populated if present in URL  
 - Never inferred from referrer  
 - Default: empty string  
 
-### Stored as
+**Stored as**
 
-sessionStorage.utm_campaign
+sessionStorage.utm_campaign  
+
 ---
 
 ## 2. Referrer-based attribution (first visit only)
@@ -244,7 +248,7 @@ function match(ref, map) {
 }
 ```
 
-Purpose:
+**Purpose**
 
 - Matches referrer hostname against known sources  
 - Returns standardized source label  
